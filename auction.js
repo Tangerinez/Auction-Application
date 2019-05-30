@@ -1,8 +1,7 @@
-var mysql = require("mysql");
+const mysql = require("mysql");
+const inquirer = require("inquirer");
 
-var inquirer = require("inquirer");
-
-var connection = mysql.createConnection({
+const connection = mysql.createConnection({
   host: "localhost",
 
   // Your port;
@@ -33,7 +32,7 @@ function initialize() {
     ])
     .then(function(response) {
       console.log(
-        "------------- " + response.choice.toUpperCase() + " -------------"
+        `------------- ${response.choice.toUpperCase()} -------------`
       );
       if (response.choices === "Post an item") {
         postItem();
@@ -141,7 +140,7 @@ function bid(itemsArr) {
       }
     ])
     .then(function(response) {
-      var bid = [];
+      let bid = [];
       bid.push(response.bid);
       bid.push(response.choice);
 
@@ -150,9 +149,7 @@ function bid(itemsArr) {
 }
 
 function updateBid(bid) {
-  console.log(
-    "Congrats!!!!\nYou are now the highest bidder at " + bid[0] + "!"
-  );
+  console.log(`Congrats! You are now the highest bidder at ${bid[0]}!`);
   connection.query("update items set ? where ?", [
     {
       highest_bid: bid[0]
@@ -165,7 +162,7 @@ function updateBid(bid) {
 }
 
 function checkBid(bid) {
-  var highestBid;
+  let highestBid;
 
   connection.query("select * from items where id=(?)", [bid[1]], function(
     err,
@@ -176,7 +173,7 @@ function checkBid(bid) {
     if (bid[0] > highestBid) {
       updateBid(bid);
     } else {
-      console.log("Sorry your bid was too low!\nPlease try again!");
+      console.log(`Sorry, your bid was too low. Please try again!`);
       initialize();
     }
   });
