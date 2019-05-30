@@ -33,7 +33,7 @@ function initialize() {
     ])
     .then(function(response) {
       console.log(
-        "------------- " + response.choices.toUpperCase() + " -------------"
+        "------------- " + response.choice.toUpperCase() + " -------------"
       );
       if (response.choices === "Post an item") {
         postItem();
@@ -122,5 +122,62 @@ function displayItems() {
       );
     }
     bid(auctionedItems);
+  });
+}
+
+function bid(itemsArr) {
+  inquirer
+    .prompt([
+      {
+        type: "list",
+        name: "choice",
+        message: "Which item number would you like to bid on?",
+        choices: itemsArr
+      },
+      {
+        type: "input",
+        name: "bid",
+        message: "How much would you like to bid?"
+      }
+    ])
+    .then(function(response) {
+      var bid = [];
+      bid.push(response.bid);
+      bid.push(response.choice);
+
+      checkBid(bid);
+    });
+}
+
+function updateBid(bid) {
+  console.log(
+    "Congrats!!!!\nYou are now the highest bidder at " + bid[0] + "!"
+  );
+  connection.query("update items set ? where ?", [
+    {
+      highest_bid: bid[0]
+    },
+    {
+      id: bid[1]
+    }
+  ]);
+  initialize();
+}
+
+function checkBid(bid) {
+  var highestBid;
+
+  connection.query("select * from items where id=(?)", [bid[1]], function(
+    err,
+    res
+  ) {
+    highestBid = res[0].highest_bid;
+
+    if (bid[0] > highestBid) {
+      updateBid(bid);
+    } else {
+      console.log("Sorry your bid was too low!\nPlease try again!");
+      initialize();
+    }
   });
 }
